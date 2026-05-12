@@ -1,0 +1,421 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Brewed Awakening — Coffee Delivered</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;0,900;1,400&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  :root {
+    --black: #0A0A08;
+    --cream: #F2EDE4;
+    --gold: #B8965A;
+    --gold-light: #D4B07A;
+    --brown: #2C1A0E;
+    --mid: #7A7060;
+    --border: rgba(184,150,90,0.25);
+  }
+  html { scroll-behavior: smooth; }
+  body { background: var(--black); color: var(--cream); font-family: 'DM Sans', sans-serif; font-weight: 300; overflow-x: hidden; }
+  nav { position: fixed; top: 0; left: 0; right: 0; z-index: 100; padding: 20px 40px; display: flex; justify-content: space-between; align-items: center; background: linear-gradient(to bottom, rgba(10,10,8,0.95), transparent); }
+  .nav-logo { font-family: 'Playfair Display', serif; font-size: 18px; font-weight: 700; letter-spacing: 0.05em; color: var(--gold); }
+  .nav-cta { background: var(--gold); color: var(--black); border: none; padding: 10px 24px; font-family: 'DM Sans', sans-serif; font-size: 13px; font-weight: 500; letter-spacing: 0.08em; text-transform: uppercase; cursor: pointer; transition: all 0.3s; }
+  .nav-cta:hover { background: var(--gold-light); }
+  .hero { min-height: 100vh; display: flex; flex-direction: column; justify-content: center; padding: 120px 40px 80px; position: relative; }
+  .hero::before { content: ''; position: absolute; inset: 0; background: radial-gradient(ellipse at 70% 50%, rgba(184,150,90,0.08) 0%, transparent 60%); pointer-events: none; }
+  .hero-eyebrow { font-size: 11px; letter-spacing: 0.2em; text-transform: uppercase; color: var(--gold); margin-bottom: 24px; opacity: 0; animation: fadeUp 0.8s 0.2s forwards; }
+  .hero-title { font-family: 'Playfair Display', serif; font-size: clamp(52px, 8vw, 96px); font-weight: 900; line-height: 0.95; margin-bottom: 32px; opacity: 0; animation: fadeUp 0.8s 0.4s forwards; }
+  .hero-title em { font-style: italic; color: var(--gold); }
+  .hero-sub { font-size: 16px; color: var(--mid); max-width: 420px; line-height: 1.7; margin-bottom: 48px; opacity: 0; animation: fadeUp 0.8s 0.6s forwards; }
+  .hero-actions { display: flex; gap: 16px; align-items: center; opacity: 0; animation: fadeUp 0.8s 0.8s forwards; }
+  .btn-primary { background: var(--gold); color: var(--black); border: none; padding: 16px 36px; font-family: 'DM Sans', sans-serif; font-size: 14px; font-weight: 500; letter-spacing: 0.08em; text-transform: uppercase; cursor: pointer; transition: all 0.3s; text-decoration: none; display: inline-block; }
+  .btn-primary:hover { background: var(--gold-light); transform: translateY(-2px); }
+  .btn-ghost { color: var(--cream); font-size: 13px; text-decoration: none; border-bottom: 1px solid var(--border); padding-bottom: 2px; }
+  .hero-badge { position: absolute; right: 80px; top: 50%; transform: translateY(-50%); width: 180px; height: 180px; border: 1px solid var(--border); border-radius: 50%; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; opacity: 0; animation: fadeIn 1s 1s forwards; }
+  .hero-badge-num { font-family: 'Playfair Display', serif; font-size: 48px; font-weight: 900; color: var(--gold); line-height: 1; }
+  .hero-badge-text { font-size: 10px; letter-spacing: 0.15em; text-transform: uppercase; color: var(--mid); margin-top: 6px; line-height: 1.5; }
+  .section { padding: 100px 40px; max-width: 1100px; margin: 0 auto; }
+  .section-label { font-size: 10px; letter-spacing: 0.25em; text-transform: uppercase; color: var(--gold); margin-bottom: 16px; }
+  .section-title { font-family: 'Playfair Display', serif; font-size: clamp(32px, 4vw, 52px); font-weight: 700; line-height: 1.1; margin-bottom: 60px; }
+  .steps { display: grid; grid-template-columns: repeat(3, 1fr); gap: 2px; }
+  .step { background: rgba(184,150,90,0.04); border: 1px solid var(--border); padding: 40px 32px; }
+  .step-num { font-family: 'Playfair Display', serif; font-size: 64px; font-weight: 900; color: rgba(184,150,90,0.15); line-height: 1; margin-bottom: 24px; }
+  .step-title { font-family: 'Playfair Display', serif; font-size: 22px; font-weight: 700; margin-bottom: 12px; }
+  .step-desc { font-size: 14px; color: var(--mid); line-height: 1.7; }
+  .packs-section { background: var(--brown); padding: 100px 40px; }
+  .packs-inner { max-width: 1100px; margin: 0 auto; }
+  .packs-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 2px; margin-top: 60px; }
+  .pack { padding: 40px 32px; border: 1px solid var(--border); transition: all 0.3s; cursor: pointer; }
+  .pack:hover { border-color: var(--gold); }
+  .pack.featured { background: var(--gold); border-color: var(--gold); }
+  .pack-tag { font-size: 10px; letter-spacing: 0.2em; text-transform: uppercase; color: var(--gold); margin-bottom: 12px; }
+  .pack.featured .pack-tag { color: var(--brown); }
+  .pack-name { font-family: 'Playfair Display', serif; font-size: 26px; font-weight: 900; margin-bottom: 8px; }
+  .pack.featured .pack-name { color: var(--black); }
+  .pack-price { font-family: 'Playfair Display', serif; font-size: 44px; font-weight: 900; color: var(--gold); line-height: 1; margin-bottom: 4px; }
+  .pack.featured .pack-price { color: var(--black); }
+  .pack-per { font-size: 12px; color: var(--mid); margin-bottom: 24px; }
+  .pack.featured .pack-per { color: rgba(10,10,8,0.6); }
+  .pack-features { list-style: none; margin-bottom: 28px; }
+  .pack-features li { font-size: 13px; color: var(--mid); padding: 7px 0; border-bottom: 1px solid rgba(184,150,90,0.1); }
+  .pack.featured .pack-features li { color: rgba(10,10,8,0.7); border-bottom-color: rgba(10,10,8,0.1); }
+  .pack-btn { width: 100%; padding: 14px; font-family: 'DM Sans', sans-serif; font-size: 12px; font-weight: 500; letter-spacing: 0.1em; text-transform: uppercase; cursor: pointer; transition: all 0.3s; border: 1px solid var(--gold); background: transparent; color: var(--gold); }
+  .pack-btn:hover { background: var(--gold); color: var(--black); }
+  .pack.featured .pack-btn { background: var(--black); color: var(--cream); border-color: var(--black); }
+  .menu-section { padding: 100px 40px; max-width: 1100px; margin: 0 auto; }
+  .menu-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 2px; margin-top: 60px; }
+  .menu-cat { border: 1px solid var(--border); padding: 36px 32px; }
+  .menu-cat-title { font-size: 10px; letter-spacing: 0.2em; text-transform: uppercase; color: var(--gold); margin-bottom: 20px; }
+  .menu-item { display: flex; justify-content: space-between; align-items: baseline; padding: 10px 0; border-bottom: 1px solid rgba(184,150,90,0.08); }
+  .menu-item-name { font-size: 14px; color: var(--cream); }
+  .menu-item-desc { font-size: 11px; color: var(--mid); margin-top: 2px; }
+  .menu-item-price { font-family: 'Playfair Display', serif; font-size: 15px; color: var(--gold); white-space: nowrap; margin-left: 16px; }
+  .order-section { background: rgba(184,150,90,0.04); border-top: 1px solid var(--border); border-bottom: 1px solid var(--border); padding: 100px 40px; }
+  .order-inner { max-width: 640px; margin: 0 auto; }
+  .order-title { font-family: 'Playfair Display', serif; font-size: clamp(28px, 4vw, 44px); font-weight: 700; margin-bottom: 12px; text-align: center; }
+  .order-sub { font-size: 14px; color: var(--mid); text-align: center; margin-bottom: 48px; line-height: 1.7; }
+  .type-toggle { display: grid; grid-template-columns: 1fr 1fr; gap: 2px; margin-bottom: 32px; }
+  .type-btn { padding: 16px; border: 1px solid var(--border); background: transparent; color: var(--mid); font-family: 'DM Sans', sans-serif; font-size: 13px; font-weight: 500; letter-spacing: 0.08em; text-transform: uppercase; cursor: pointer; transition: all 0.3s; }
+  .type-btn.active { border-color: var(--gold); color: var(--gold); background: rgba(184,150,90,0.08); }
+  .form-group { margin-bottom: 20px; }
+  .form-label { display: block; font-size: 10px; letter-spacing: 0.15em; text-transform: uppercase; color: var(--gold); margin-bottom: 8px; }
+  .form-input, .form-select, .form-textarea { width: 100%; background: rgba(255,255,255,0.03); border: 1px solid var(--border); color: var(--cream); padding: 14px 16px; font-family: 'DM Sans', sans-serif; font-size: 14px; outline: none; transition: border-color 0.3s; appearance: none; }
+  .form-input:focus, .form-select:focus, .form-textarea:focus { border-color: var(--gold); }
+  .form-select option { background: var(--black); }
+  .form-textarea { resize: vertical; min-height: 80px; }
+  .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+  .pack-selector { display: grid; gap: 8px; margin-bottom: 24px; }
+  .pack-option { border: 1px solid var(--border); padding: 18px 20px; cursor: pointer; transition: all 0.3s; display: flex; justify-content: space-between; align-items: center; }
+  .pack-option:hover, .pack-option.selected { border-color: var(--gold); background: rgba(184,150,90,0.08); }
+  .pack-option-name { font-family: 'Playfair Display', serif; font-size: 18px; font-weight: 700; color: var(--cream); }
+  .pack-option-desc { font-size: 12px; color: var(--mid); margin-top: 3px; }
+  .pack-option-price { font-family: 'Playfair Display', serif; font-size: 22px; font-weight: 900; color: var(--gold); }
+  .business-fields { display: none; }
+  .business-fields.show { display: block; }
+  .form-submit { width: 100%; padding: 18px; background: var(--gold); color: var(--black); border: none; font-family: 'DM Sans', sans-serif; font-size: 14px; font-weight: 500; letter-spacing: 0.1em; text-transform: uppercase; cursor: pointer; transition: all 0.3s; margin-top: 8px; }
+  .form-submit:hover { background: var(--gold-light); }
+  .form-submit:disabled { opacity: 0.6; cursor: not-allowed; }
+  .success-card { display: none; background: rgba(184,150,90,0.08); border: 1px solid var(--gold); padding: 40px; text-align: center; margin-top: 24px; }
+  .success-card h3 { font-family: 'Playfair Display', serif; font-size: 28px; color: var(--gold); margin-bottom: 12px; }
+  .success-card p { font-size: 14px; color: var(--mid); line-height: 1.7; }
+  .error-msg { background: rgba(200,80,80,0.1); border: 1px solid rgba(200,80,80,0.4); color: #e08080; padding: 12px 16px; font-size: 13px; margin-top: 12px; display: none; }
+  .zone-section { padding: 80px 40px; max-width: 1100px; margin: 0 auto; display: grid; grid-template-columns: 1fr 1fr; gap: 80px; align-items: center; }
+  .zone-title { font-family: 'Playfair Display', serif; font-size: clamp(28px, 3vw, 42px); font-weight: 700; margin-bottom: 20px; line-height: 1.1; }
+  .zone-desc { font-size: 14px; color: var(--mid); line-height: 1.8; margin-bottom: 16px; }
+  .zone-map { background: rgba(184,150,90,0.04); border: 1px solid var(--border); height: 260px; display: flex; align-items: center; justify-content: center; }
+  .zone-map-inner { text-align: center; }
+  .zone-map-pin { font-size: 40px; display: block; margin-bottom: 12px; }
+  .zone-map-text { font-family: 'Playfair Display', serif; font-size: 18px; color: var(--gold); }
+  .zone-map-sub { font-size: 12px; color: var(--mid); margin-top: 4px; }
+  footer { border-top: 1px solid var(--border); padding: 40px; display: flex; justify-content: space-between; align-items: center; }
+  .footer-logo { font-family: 'Playfair Display', serif; font-size: 16px; color: var(--gold); font-weight: 700; }
+  .footer-text { font-size: 12px; color: var(--mid); }
+  .gold-line { width: 100%; height: 1px; background: linear-gradient(to right, transparent, var(--gold), transparent); opacity: 0.3; }
+  @keyframes fadeUp { from { opacity: 0; transform: translateY(24px); } to { opacity: 1; transform: translateY(0); } }
+  @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+  @media (max-width: 768px) {
+    nav { padding: 16px 20px; }
+    .hero { padding: 100px 20px 60px; }
+    .hero-badge { display: none; }
+    .steps, .packs-grid, .menu-grid, .zone-section { grid-template-columns: 1fr; }
+    .form-row { grid-template-columns: 1fr; }
+    .section, .packs-section, .order-section, .menu-section { padding: 60px 20px; }
+    footer { flex-direction: column; gap: 12px; text-align: center; }
+  }
+</style>
+</head>
+<body>
+<nav>
+  <div class="nav-logo">Brewed Awakening</div>
+  <button class="nav-cta" onclick="document.getElementById('order').scrollIntoView({behavior:'smooth'})">Order Now</button>
+</nav>
+<section class="hero">
+  <p class="hero-eyebrow">Specialty Coffee • Delivered to Your Door</p>
+  <h1 class="hero-title">Your coffee.<br><em>Anywhere.</em><br>30 minutes.</h1>
+  <p class="hero-sub">Buy a pack upfront. Order one at a time, whenever you want. Delivered anywhere in Linksfield within 30 minutes — 7 days a week.</p>
+  <div class="hero-actions">
+    <a href="#order" class="btn-primary">Get Your Pack</a>
+    <a href="#how" class="btn-ghost">How it works</a>
+  </div>
+  <div class="hero-badge">
+    <span class="hero-badge-num">30</span>
+    <span class="hero-badge-text">minute<br>delivery<br>guaranteed</span>
+  </div>
+</section>
+<div class="gold-line"></div>
+<section class="section" id="how">
+  <p class="section-label">Simple as it gets</p>
+  <h2 class="section-title">How it works</h2>
+  <div class="steps">
+    <div class="step"><div class="step-num">01</div><h3 class="step-title">Buy your pack</h3><p class="step-desc">Choose your pack size upfront. Pay once, use whenever you want. No expiry, no pressure.</p></div>
+    <div class="step"><div class="step-num">02</div><h3 class="step-title">Order when you want</h3><p class="step-desc">Full menu every time — hot, iced, signature. Whatever you're feeling, whenever you feel it.</p></div>
+    <div class="step"><div class="step-num">03</div><h3 class="step-title">We're at your door</h3><p class="step-desc">Within 30 minutes, fresh and ready. Monday to Sunday, 7am to 7pm. No excuses.</p></div>
+  </div>
+</section>
+<div class="gold-line"></div>
+<section class="packs-section" id="packs">
+  <div class="packs-inner">
+    <p class="section-label">Choose your pack</p>
+    <h2 class="section-title">Simple pricing.<br>No surprises.</h2>
+    <div class="packs-grid">
+      <div class="pack" onclick="scrollToOrder('individual','10 Pack','350')">
+        <p class="pack-tag">Individual</p>
+        <h3 class="pack-name">10 Coffees</h3>
+        <div class="pack-price">R350</div>
+        <p class="pack-per">R35 per coffee — delivery included</p>
+        <ul class="pack-features"><li>Full menu — hot & cold</li><li>Order one at a time</li><li>30 min delivery</li><li>7 days, 7am–7pm</li></ul>
+        <button class="pack-btn">Select Pack</button>
+      </div>
+      <div class="pack featured" onclick="scrollToOrder('individual','20 Pack','650')">
+        <p class="pack-tag">Best Value</p>
+        <h3 class="pack-name">20 Coffees</h3>
+        <div class="pack-price">R650</div>
+        <p class="pack-per">R32.50 per coffee — save R50</p>
+        <ul class="pack-features"><li>Full menu — hot & cold</li><li>Order one at a time</li><li>30 min delivery</li><li>7 days, 7am–7pm</li></ul>
+        <button class="pack-btn">Select Pack</button>
+      </div>
+      <div class="pack" onclick="scrollToOrder('business','50 Pack','1500')">
+        <p class="pack-tag">Business</p>
+        <h3 class="pack-name">50 Coffees</h3>
+        <div class="pack-price">R1,500</div>
+        <p class="pack-per">R30 per coffee — bulk rate</p>
+        <ul class="pack-features"><li>Full menu — hot & cold</li><li>Bulk orders per delivery</li><li>Daily office delivery option</li><li>7 days, 7am–7pm</li></ul>
+        <button class="pack-btn">Select Pack</button>
+      </div>
+    </div>
+  </div>
+</section>
+<div class="gold-line"></div>
+<section class="menu-section" id="menu">
+  <p class="section-label">What we make</p>
+  <h2 class="section-title">The full menu.<br>Every order.</h2>
+  <div class="menu-grid">
+    <div class="menu-cat">
+      <p class="menu-cat-title">The Classics</p>
+      <div class="menu-item"><div><div class="menu-item-name">Espresso / Doppio</div><div class="menu-item-desc">Single origin, pulled fresh</div></div><div class="menu-item-price">R28–38</div></div>
+      <div class="menu-item"><div><div class="menu-item-name">Americano</div><div class="menu-item-desc">Bold and clean</div></div><div class="menu-item-price">R40</div></div>
+      <div class="menu-item"><div><div class="menu-item-name">Cortado</div><div class="menu-item-desc">Equal parts espresso and milk</div></div><div class="menu-item-price">R35</div></div>
+      <div class="menu-item"><div><div class="menu-item-name">Cappuccino</div><div class="menu-item-desc">Classic, proper foam</div></div><div class="menu-item-price">R45</div></div>
+      <div class="menu-item"><div><div class="menu-item-name">Flat White</div><div class="menu-item-desc">Double ristretto, silky microfoam</div></div><div class="menu-item-price">R45</div></div>
+      <div class="menu-item"><div><div class="menu-item-name">Latte</div><div class="menu-item-desc">Smooth and velvety</div></div><div class="menu-item-price">R45</div></div>
+      <div class="menu-item"><div><div class="menu-item-name">Mocha / Hot Chocolate</div><div class="menu-item-desc">Belgian chocolate, steamed milk</div></div><div class="menu-item-price">R48–55</div></div>
+    </div>
+    <div class="menu-cat">
+      <p class="menu-cat-title">Signatures & Iced</p>
+      <div class="menu-item"><div><div class="menu-item-name">Honey Lavender Latte</div><div class="menu-item-desc">Floral and warming</div></div><div class="menu-item-price">R58</div></div>
+      <div class="menu-item"><div><div class="menu-item-name">Rose Latte</div><div class="menu-item-desc">Delicate and aromatic</div></div><div class="menu-item-price">R58</div></div>
+      <div class="menu-item"><div><div class="menu-item-name">Dirty Chai Latte</div><div class="menu-item-desc">Spiced chai and espresso</div></div><div class="menu-item-price">R58</div></div>
+      <div class="menu-item"><div><div class="menu-item-name">Vanilla / Hazelnut Latte</div><div class="menu-item-desc">House syrups, velvety milk</div></div><div class="menu-item-price">R52</div></div>
+      <div class="menu-item"><div><div class="menu-item-name">Iced Latte</div><div class="menu-item-desc">Base or flavoured +R10</div></div><div class="menu-item-price">R45</div></div>
+      <div class="menu-item"><div><div class="menu-item-name">Iced Rose Latte</div><div class="menu-item-desc">Cold, pretty, perfect</div></div><div class="menu-item-price">R60</div></div>
+      <div class="menu-item"><div><div class="menu-item-name">Cold Brew Tonic</div><div class="menu-item-desc">Crisp and unexpected</div></div><div class="menu-item-price">R58</div></div>
+    </div>
+  </div>
+</section>
+<div class="gold-line"></div>
+<section class="zone-section">
+  <div>
+    <p class="section-label">Where we deliver</p>
+    <h2 class="zone-title">Linksfield.<br>For now.</h2>
+    <p class="zone-desc">Starting local and doing it properly. Linksfield only while we perfect the experience. More areas coming soon.</p>
+    <p class="zone-desc">Monday to Sunday. 7am to 7pm. 30 minutes or less.</p>
+  </div>
+  <div class="zone-map">
+    <div class="zone-map-inner">
+      <span class="zone-map-pin">📍</span>
+      <div class="zone-map-text">Linksfield</div>
+      <div class="zone-map-sub">Delivery Zone — Active Now</div>
+    </div>
+  </div>
+</section>
+<div class="gold-line"></div>
+<section class="order-section" id="order">
+  <div class="order-inner">
+    <h2 class="order-title">Get your pack</h2>
+    <p class="order-sub">Fill in your details. We'll confirm your order and payment within the hour.</p>
+    <div class="type-toggle">
+      <button class="type-btn active" id="btn-individual" onclick="setType('individual')">Individual</button>
+      <button class="type-btn" id="btn-business" onclick="setType('business')">Business</button>
+    </div>
+    <div class="form-group">
+      <label class="form-label">Select your pack</label>
+      <div class="pack-selector">
+        <div class="pack-option selected" id="opt-10" onclick="selectPack(this,'10 Pack','350')" data-type="individual">
+          <div><div class="pack-option-name">10 Pack</div><div class="pack-option-desc">Order one at a time — on demand</div></div>
+          <div class="pack-option-price">R350</div>
+        </div>
+        <div class="pack-option" id="opt-20" onclick="selectPack(this,'20 Pack','650')" data-type="individual">
+          <div><div class="pack-option-name">20 Pack</div><div class="pack-option-desc">Best value — save R50</div></div>
+          <div class="pack-option-price">R650</div>
+        </div>
+        <div class="pack-option" id="opt-50" onclick="selectPack(this,'50 Pack','1500')" data-type="business" style="display:none">
+          <div><div class="pack-option-name">50 Pack</div><div class="pack-option-desc">Minimum business order</div></div>
+          <div class="pack-option-price">R1,500</div>
+        </div>
+        <div class="pack-option" id="opt-100" onclick="selectPack(this,'100 Pack','2800')" data-type="business" style="display:none">
+          <div><div class="pack-option-name">100 Pack</div><div class="pack-option-desc">High volume — R28 per coffee</div></div>
+          <div class="pack-option-price">R2,800</div>
+        </div>
+      </div>
+    </div>
+    <div class="form-row">
+      <div class="form-group">
+        <label class="form-label">First Name</label>
+        <input class="form-input" type="text" id="fname" placeholder="Your name">
+      </div>
+      <div class="form-group">
+        <label class="form-label">Last Name</label>
+        <input class="form-input" type="text" id="lname" placeholder="Your surname">
+      </div>
+    </div>
+    <div class="form-group">
+      <label class="form-label">WhatsApp Number</label>
+      <input class="form-input" type="tel" id="phone" placeholder="+27 82 000 0000">
+    </div>
+    <div class="form-group">
+      <label class="form-label">Delivery Address</label>
+      <input class="form-input" type="text" id="address" placeholder="Your address in Linksfield">
+    </div>
+    <div class="business-fields" id="business-fields">
+      <div class="form-group">
+        <label class="form-label">Company Name</label>
+        <input class="form-input" type="text" id="company" placeholder="Your business name">
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label class="form-label">Coffees per delivery</label>
+          <input class="form-input" type="number" id="per-delivery" placeholder="e.g. 10" min="1">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Delivery schedule</label>
+          <select class="form-select" id="schedule">
+            <option value="">Select</option>
+            <option>Daily — Mon to Fri</option>
+            <option>Daily — Mon to Sat</option>
+            <option>Every second day</option>
+            <option>Weekly</option>
+            <option>On demand</option>
+          </select>
+        </div>
+      </div>
+    </div>
+    <div class="form-group">
+      <label class="form-label">Anything else we should know?</label>
+      <textarea class="form-textarea form-input" id="notes" placeholder="Gate code, preferred time, milk preferences, allergies..."></textarea>
+    </div>
+    <button class="form-submit" id="submit-btn" onclick="submitOrder()">
+      Confirm My Pack — <span id="price-display">R350</span>
+    </button>
+    <div class="error-msg" id="error-msg"></div>
+    <div class="success-card" id="success-card">
+      <h3>Order received ✓</h3>
+      <p>We'll be in touch within the hour to confirm your payment and get your pack activated.<br><br>Welcome to Brewed Awakening.</p>
+    </div>
+  </div>
+</section>
+<footer>
+  <div class="footer-logo">Brewed Awakening</div>
+  <div class="footer-text">The Hive, George Ave, Linksfield • 7am–7pm Daily</div>
+  <div class="footer-text">© 2025 Brewed Awakening</div>
+</footer>
+<script>
+  const { createClient } = supabase;
+  const db = createClient(
+    'https://tjbcszfaveyzlcvwuxtw.supabase.co',
+    'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InRqYmNzemZhdmV5emxjdnd1eHR3Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzg1Njc4MDAsImV4cCI6MjA5NDE0MzgwMH0.GloLk5-9h-wh8XdmQkLIxyAcTGOIB0YnptN-t_eZ_4Y'
+  );
+
+  let currentType = 'individual';
+  let selectedPackName = '10 Pack';
+  let selectedPackPrice = '350';
+
+  function setType(type) {
+    currentType = type;
+    document.getElementById('btn-individual').classList.toggle('active', type === 'individual');
+    document.getElementById('btn-business').classList.toggle('active', type === 'business');
+    document.getElementById('business-fields').classList.toggle('show', type === 'business');
+    document.querySelectorAll('.pack-option').forEach(el => {
+      el.style.display = el.dataset.type === type ? 'flex' : 'none';
+      el.classList.remove('selected');
+    });
+    if (type === 'individual') {
+      const el = document.getElementById('opt-10');
+      el.classList.add('selected');
+      selectedPackName = '10 Pack'; selectedPackPrice = '350';
+    } else {
+      const el = document.getElementById('opt-50');
+      el.classList.add('selected');
+      selectedPackName = '50 Pack'; selectedPackPrice = '1500';
+    }
+    document.getElementById('price-display').textContent = 'R' + Number(selectedPackPrice).toLocaleString();
+  }
+
+  function selectPack(el, name, price) {
+    selectedPackName = name;
+    selectedPackPrice = price;
+    document.querySelectorAll('.pack-option').forEach(o => o.classList.remove('selected'));
+    el.classList.add('selected');
+    document.getElementById('price-display').textContent = 'R' + Number(price).toLocaleString();
+  }
+
+  function scrollToOrder(type, pack, price) {
+    setType(type);
+    selectedPackName = pack; selectedPackPrice = price;
+    document.getElementById('price-display').textContent = 'R' + Number(price).toLocaleString();
+    setTimeout(() => document.getElementById('order').scrollIntoView({ behavior: 'smooth' }), 100);
+  }
+
+  async function submitOrder() {
+    const fname = document.getElementById('fname').value.trim();
+    const lname = document.getElementById('lname').value.trim();
+    const phone = document.getElementById('phone').value.trim();
+    const address = document.getElementById('address').value.trim();
+    const notes = document.getElementById('notes').value.trim();
+    const errorEl = document.getElementById('error-msg');
+
+    if (!fname || !phone || !address) {
+      errorEl.style.display = 'block';
+      errorEl.textContent = 'Please fill in your name, WhatsApp number and address.';
+      return;
+    }
+
+    errorEl.style.display = 'none';
+    const btn = document.getElementById('submit-btn');
+    btn.disabled = true;
+    btn.textContent = 'Submitting...';
+
+    let notesStr = notes;
+    if (currentType === 'business') {
+      const company = document.getElementById('company').value.trim();
+      const perDelivery = document.getElementById('per-delivery').value.trim();
+      const schedule = document.getElementById('schedule').value;
+      notesStr = `Company: ${company} | Per delivery: ${perDelivery} | Schedule: ${schedule}${notes ? ' | ' + notes : ''}`;
+    }
+
+    try {
+      const { error } = await db.from('orders').insert([{
+        name: `${fname} ${lname}`.trim(),
+        phone,
+        address,
+        pack_type: selectedPackName,
+        customer_type: currentType,
+        notes: notesStr || null,
+        status: 'new'
+      }]);
+      if (error) throw error;
+      btn.style.display = 'none';
+      document.getElementById('success-card').style.display = 'block';
+    } catch (err) {
+      btn.disabled = false;
+      btn.textContent = `Confirm My Pack — R${Number(selectedPackPrice).toLocaleString()}`;
+      errorEl.style.display = 'block';
+      errorEl.textContent = 'Something went wrong. Please try again.';
+    }
+  }
+
+  document.querySelectorAll('.pack-option[data-type="business"]').forEach(el => el.style.display = 'none');
+</script>
+</body>
+</html>
