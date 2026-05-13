@@ -365,9 +365,9 @@
     selectedPackName = pack; selectedPackPrice = price;
     document.getElementById('price-display').textContent = 'R' + Number(price).toLocaleString();
     setTimeout(() => document.getElementById('order').scrollIntoView({ behavior: 'smooth' }), 100);
-  }
-
-  async function submitOrder() {
+  } }
+async function submitOrder() {
+ async function submitOrder() {
     const fname = document.getElementById('fname').value.trim();
     const lname = document.getElementById('lname').value.trim();
     const phone = document.getElementById('phone').value.trim();
@@ -384,7 +384,7 @@
     errorEl.style.display = 'none';
     const btn = document.getElementById('submit-btn');
     btn.disabled = true;
-    btn.textContent = 'Submitting...';
+    btn.textContent = 'Redirecting to payment...';
 
     let notesStr = notes;
     if (currentType === 'business') {
@@ -394,19 +394,38 @@
       notesStr = `Company: ${company} | Per delivery: ${perDelivery} | Schedule: ${schedule}${notes ? ' | ' + notes : ''}`;
     }
 
+    const orderData = {
+      name: `${fname} ${lname}`.trim(),
+      phone,
+      address,
+      pack_type: selectedPackName,
+      customer_type: currentType,
+      notes: notesStr || null,
+      amount: selectedPackPrice
+    };
+
     try {
-      const { error } = await db.from('orders').insert([{
-        name: `${fname} ${lname}`.trim(),
-        phone,
-        address,
-        pack_type: selectedPackName,
-        customer_type: currentType,
-        notes: notesStr || null,
-        status: 'new'
-      }]);
-      if (error) throw error;
-      btn.style.display = 'none';
-      document.getElementById('success-card').style.display = 'block';
+      const response = await fetch('/.netlify/functions/create-payment', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          amount: parseInt(selectedPackPrice) * 100,
+          currency: 'ZAR',
+          name: orderData.name,
+          phone: orderData.phone,
+          address: orderData.address,
+          pack_type: orderData.pack_type,
+          customer_type: orderData.customer_type,
+          notes: orderData.notes
+        })
+      });
+
+      const data = await response.json();
+      if (data.redirectUrl) {
+        window.location.href = data.redirectUrl;
+      } else {
+        throw new Error('No redirect URL');
+      }
     } catch (err) {
       btn.disabled = false;
       btn.textContent = `Confirm My Pack — R${Number(selectedPackPrice).toLocaleString()}`;
@@ -414,7 +433,6 @@
       errorEl.textContent = 'Something went wrong. Please try again.';
     }
   }
-
   document.querySelectorAll('.pack-option[data-type="business"]').forEach(el => el.style.display = 'none');
 </script>
 </body>
