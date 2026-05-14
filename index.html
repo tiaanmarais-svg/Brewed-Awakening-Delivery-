@@ -365,7 +365,7 @@
     selectedPackName = pack; selectedPackPrice = price;
     document.getElementById('price-display').textContent = 'R' + Number(price).toLocaleString();
     setTimeout(() => document.getElementById('order').scrollIntoView({ behavior: 'smooth' }), 100);
-  } }
+  } 
 
  async function submitOrder() {
     const fname = document.getElementById('fname').value.trim();
