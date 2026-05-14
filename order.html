@@ -19,7 +19,6 @@
   .section-label { font-size: 10px; letter-spacing: 0.25em; text-transform: uppercase; color: var(--gold); margin-bottom: 12px; }
   .section-title { font-family: 'Playfair Display', serif; font-size: clamp(28px, 4vw, 40px); font-weight: 700; line-height: 1.1; margin-bottom: 32px; }
   .gold-line { width: 100%; height: 1px; background: linear-gradient(to right, transparent, var(--gold), transparent); opacity: 0.3; margin: 32px 0; }
-  /* PHONE LOGIN */
   .login-card { border: 1px solid var(--border); padding: 48px 40px; text-align: center; }
   .login-card p { font-size: 14px; color: var(--mid); margin-bottom: 32px; line-height: 1.7; }
   .form-group { margin-bottom: 20px; text-align: left; }
@@ -33,7 +32,6 @@
   .btn:disabled { opacity: 0.6; cursor: not-allowed; }
   .btn-ghost { background: transparent; border: 1px solid var(--border); color: var(--mid); }
   .btn-ghost:hover { border-color: var(--gold); color: var(--gold); background: transparent; }
-  /* BALANCE CARD */
   .balance-card { border: 1px solid var(--border); padding: 32px; margin-bottom: 32px; display: flex; justify-content: space-between; align-items: center; }
   .balance-info h3 { font-family: 'Playfair Display', serif; font-size: 18px; margin-bottom: 4px; }
   .balance-info p { font-size: 13px; color: var(--mid); }
@@ -41,7 +39,6 @@
   .balance-cups .num { font-family: 'Playfair Display', serif; font-size: 48px; font-weight: 900; color: var(--gold); line-height: 1; }
   .balance-cups .label { font-size: 11px; color: var(--mid); letter-spacing: 0.1em; text-transform: uppercase; }
   .bonus-tag { display: inline-block; background: rgba(184,150,90,0.1); border: 1px solid var(--border); padding: 4px 10px; font-size: 11px; color: var(--gold); margin-top: 8px; }
-  /* DRINK MENU */
   .menu-section { margin-bottom: 32px; }
   .menu-cat-title { font-size: 10px; letter-spacing: 0.2em; text-transform: uppercase; color: var(--gold); margin-bottom: 16px; padding-bottom: 8px; border-bottom: 1px solid var(--border); }
   .drink-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 24px; }
@@ -49,25 +46,35 @@
   .drink-option:hover, .drink-option.selected { border-color: var(--gold); background: rgba(184,150,90,0.08); }
   .drink-name { font-size: 14px; font-weight: 500; color: var(--cream); margin-bottom: 3px; }
   .drink-desc { font-size: 11px; color: var(--mid); }
-  /* CUSTOMISE */
   .customise-section { border: 1px solid var(--border); padding: 24px; margin-bottom: 24px; }
   .customise-title { font-size: 11px; letter-spacing: 0.15em; text-transform: uppercase; color: var(--gold); margin-bottom: 16px; }
   .option-row { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 12px; }
   .option-pill { padding: 8px 16px; border: 1px solid var(--border); font-size: 12px; color: var(--mid); cursor: pointer; transition: all 0.3s; border-radius: 20px; }
   .option-pill:hover, .option-pill.selected { border-color: var(--gold); color: var(--gold); background: rgba(184,150,90,0.08); }
-  /* ORDER SUMMARY */
   .summary-card { border: 1px solid var(--gold); padding: 24px; margin-bottom: 24px; background: rgba(184,150,90,0.04); }
   .summary-title { font-size: 10px; letter-spacing: 0.2em; text-transform: uppercase; color: var(--gold); margin-bottom: 16px; }
   .summary-row { display: flex; justify-content: space-between; padding: 8px 0; border-bottom: 1px solid rgba(184,150,90,0.08); font-size: 13px; }
   .summary-row:last-child { border-bottom: none; }
   .summary-label { color: var(--mid); }
   .summary-value { color: var(--cream); }
-  /* STATES */
   .hidden { display: none; }
-  
   .error-msg { background: rgba(200,80,80,0.1); border: 1px solid rgba(200,80,80,0.4); color: #e08080; padding: 12px 16px; font-size: 13px; margin-top: 12px; }
-  <!-- LOGIN STATE -->
-  <div id="login-state">
+  .success-card { border: 1px solid var(--gold); padding: 48px 40px; text-align: center; }
+  .success-card h2 { font-family: 'Playfair Display', serif; font-size: 32px; color: var(--gold); margin-bottom: 16px; }
+  .success-card p { font-size: 14px; color: var(--mid); line-height: 1.7; margin-bottom: 12px; }
+  .no-cups { border: 1px solid var(--border); padding: 48px 40px; text-align: center; }
+  .no-cups h2 { font-family: 'Playfair Display', serif; font-size: 28px; margin-bottom: 16px; }
+  .no-cups p { font-size: 14px; color: var(--mid); line-height: 1.7; margin-bottom: 24px; }
+  @media (max-width: 600px) { .drink-grid { grid-template-columns: 1fr; } nav { padding: 16px 20px; } .container { padding: 80px 16px 40px; } .login-card, .success-card, .no-cups { padding: 32px 24px; } .balance-card { flex-direction: column; gap: 16px; text-align: center; } .balance-cups { text-align: center; } }
+</style>
+</head>
+<body>
+<nav>
+  <a href="/" class="nav-logo">Brewed Awakening</a>
+  <div class="nav-balance hidden" id="nav-balance">Cups remaining: <span id="nav-cups">0</span></div>
+</nav>
+<div class="container">
+ <div id="login-state">
     <p class="section-label">Your Coffee Portal</p>
     <h1 class="section-title">Order your<br>next coffee.</h1>
     <div class="login-card">
@@ -81,7 +88,6 @@
     </div>
   </div>
 
-  <!-- NO CUPS STATE -->
   <div id="no-cups-state" class="hidden">
     <div class="no-cups">
       <h2>You're out of cups ☕</h2>
@@ -92,12 +98,9 @@
     </div>
   </div>
 
-  <!-- ORDER STATE -->
   <div id="order-state" class="hidden">
     <p class="section-label">Good to see you</p>
     <h1 class="section-title" id="greeting">What are you having?</h1>
-
-    <!-- Balance -->
     <div class="balance-card">
       <div class="balance-info">
         <h3 id="customer-name-display">Your Account</h3>
@@ -109,10 +112,7 @@
         <div class="label">cups left</div>
       </div>
     </div>
-
     <div class="gold-line"></div>
-
-    <!-- Drink Menu -->
     <div class="menu-section">
       <div class="menu-cat-title">The Classics</div>
       <div class="drink-grid">
@@ -126,7 +126,6 @@
         <div class="drink-option" onclick="selectDrink(this,'Mocha')"><div class="drink-name">Mocha</div><div class="drink-desc">Espresso and Belgian chocolate</div></div>
         <div class="drink-option" onclick="selectDrink(this,'Hot Chocolate')"><div class="drink-name">Hot Chocolate</div><div class="drink-desc">Belgian chocolate, steamed milk</div></div>
       </div>
-
       <div class="menu-cat-title">Signatures</div>
       <div class="drink-grid">
         <div class="drink-option" onclick="selectDrink(this,'Honey Lavender Latte')"><div class="drink-name">Honey Lavender Latte</div><div class="drink-desc">Floral and warming</div></div>
@@ -135,7 +134,6 @@
         <div class="drink-option" onclick="selectDrink(this,'Vanilla Latte')"><div class="drink-name">Vanilla Latte</div><div class="drink-desc">House vanilla, velvety milk</div></div>
         <div class="drink-option" onclick="selectDrink(this,'Hazelnut Latte')"><div class="drink-name">Hazelnut Latte</div><div class="drink-desc">Toasted hazelnut syrup</div></div>
       </div>
-
       <div class="menu-cat-title">Iced & Cold</div>
       <div class="drink-grid">
         <div class="drink-option" onclick="selectDrink(this,'Iced Latte')"><div class="drink-name">Iced Latte</div><div class="drink-desc">Espresso over ice with cold milk</div></div>
@@ -145,8 +143,6 @@
         <div class="drink-option" onclick="selectDrink(this,'Cold Brew Tonic')"><div class="drink-name">Cold Brew Tonic</div><div class="drink-desc">Crisp and unexpected</div></div>
       </div>
     </div>
-
-    <!-- Customise -->
     <div class="customise-section" id="customise-section" style="display:none">
       <div class="customise-title">Customise your order</div>
       <div class="form-group">
@@ -163,8 +159,6 @@
         <textarea class="form-textarea form-input" id="order-notes" placeholder="Extra shot, no sugar, extra hot..."></textarea>
       </div>
     </div>
-
-    <!-- Summary -->
     <div class="summary-card hidden" id="summary-card">
       <div class="summary-title">Order Summary</div>
       <div class="summary-row"><span class="summary-label">Drink</span><span class="summary-value" id="sum-drink">—</span></div>
@@ -172,14 +166,12 @@
       <div class="summary-row"><span class="summary-label">Delivering to</span><span class="summary-value" id="sum-address">—</span></div>
       <div class="summary-row"><span class="summary-label">Cups after this order</span><span class="summary-value" id="sum-remaining">—</span></div>
     </div>
-
     <button class="btn hidden" id="place-order-btn" onclick="placeOrder()">Place My Order</button>
     <div class="error-msg hidden" id="order-error"></div>
     <br><br>
     <button class="btn btn-ghost" onclick="logout()" style="margin-top:8px">Switch Account</button>
   </div>
 
-  <!-- SUCCESS STATE -->
   <div id="success-state" class="hidden">
     <div class="success-card">
       <h2>Order placed ✓</h2>
@@ -190,9 +182,8 @@
       <button class="btn" onclick="resetOrder()" style="margin-top:24px">Order Another</button>
     </div>
   </div>
-
 </div>
-  <script>
+<script>
   const { createClient } = supabase;
   const db = createClient(
     'https://tjbcszfaveyzlcvwuxtw.supabase.co',
@@ -209,21 +200,17 @@
   async function lookupCustomer() {
     const phone = document.getElementById('login-phone').value.trim();
     const errorEl = document.getElementById('login-error');
-    
     if (!phone) {
       errorEl.textContent = 'Please enter your WhatsApp number.';
       errorEl.classList.remove('hidden');
       return;
     }
-
     const btn = document.querySelector('#login-state .btn');
     btn.disabled = true;
     btn.textContent = 'Looking up...';
     errorEl.classList.add('hidden');
-
     try {
       const { data, error } = await db.from('customers').select('*').eq('phone', phone).single();
-      
       if (error || !data) {
         errorEl.textContent = 'No account found for that number. Please check your number or purchase a pack first.';
         errorEl.classList.remove('hidden');
@@ -231,7 +218,6 @@
         btn.textContent = 'Access My Account';
         return;
       }
-
       currentCustomer = data;
       loadOrderState();
     } catch (err) {
@@ -244,28 +230,20 @@
 
   function loadOrderState() {
     hide('login-state');
-    
     const c = currentCustomer;
     const totalCups = c.cups_remaining + c.bonus_cups;
-
-    if (totalCups <= 0) {
-      show('no-cups-state');
-      return;
-    }
-
+    if (totalCups <= 0) { show('no-cups-state'); return; }
     document.getElementById('greeting').textContent = `What are you having, ${c.name ? c.name.split(' ')[0] : 'there'}?`;
     document.getElementById('customer-name-display').textContent = c.name || 'Your Account';
     document.getElementById('pack-type-display').textContent = c.pack_type || '';
     document.getElementById('cups-display').textContent = totalCups;
     document.getElementById('nav-cups').textContent = totalCups;
     show('nav-balance');
-
     if (c.bonus_cups > 0) {
       const bonusTag = document.getElementById('bonus-tag');
       bonusTag.textContent = `+${c.bonus_cups} loyalty bonus cup${c.bonus_cups > 1 ? 's' : ''}`;
       bonusTag.classList.remove('hidden');
     }
-
     show('order-state');
   }
 
@@ -298,18 +276,14 @@
 
   async function placeOrder() {
     if (!selectedDrink) return;
-    
     const btn = document.getElementById('place-order-btn');
     const errorEl = document.getElementById('order-error');
     btn.disabled = true;
     btn.textContent = 'Placing order...';
     errorEl.classList.add('hidden');
-
     const c = currentCustomer;
     const notes = document.getElementById('order-notes').value.trim();
-
     try {
-      // Save drink order
       const { error: orderError } = await db.from('drink_orders').insert([{
         customer_phone: c.phone,
         customer_name: c.name,
@@ -319,30 +293,21 @@
         notes: notes || null,
         status: 'pending'
       }]);
-
       if (orderError) throw orderError;
-
-      // Deduct cup — use bonus cups first
       let newBonus = c.bonus_cups;
       let newRemaining = c.cups_remaining;
       if (newBonus > 0) { newBonus -= 1; } else { newRemaining -= 1; }
-
       const { error: updateError } = await db.from('customers').update({
         cups_remaining: newRemaining,
         bonus_cups: newBonus
       }).eq('phone', c.phone);
-
       if (updateError) throw updateError;
-
-      // Update local state
       currentCustomer.cups_remaining = newRemaining;
       currentCustomer.bonus_cups = newBonus;
       const remaining = newRemaining + newBonus;
-
       hide('order-state');
       document.getElementById('success-cups-msg').textContent = `You have ${remaining} cup${remaining !== 1 ? 's' : ''} remaining.`;
       show('success-state');
-
     } catch (err) {
       errorEl.textContent = 'Something went wrong placing your order. Please try again.';
       errorEl.classList.remove('hidden');
@@ -378,4 +343,3 @@
 </script>
 </body>
 </html>
-  .success-card { border: 1px solid var(--go
