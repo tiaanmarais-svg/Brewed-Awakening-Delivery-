@@ -86,6 +86,19 @@
   .pack-option-name { font-family: 'Playfair Display', serif; font-size: 18px; font-weight: 700; color: var(--cream); }
   .pack-option-desc { font-size: 12px; color: var(--mid); margin-top: 3px; }
   .pack-option-price { font-family: 'Playfair Display', serif; font-size: 22px; font-weight: 900; color: var(--gold); }
+  .double-shot-toggle { border: 1px solid var(--border); padding: 16px 20px; margin-bottom: 8px; display: flex; justify-content: space-between; align-items: center; cursor: pointer; transition: all 0.3s; }
+  .double-shot-toggle.active { border-color: var(--gold); background: rgba(184,150,90,0.08); }
+  .double-shot-toggle.hidden { display: none; }
+  .toggle-left { display: flex; flex-direction: column; }
+  .toggle-name { font-size: 14px; font-weight: 500; color: var(--cream); }
+  .toggle-desc { font-size: 12px; color: var(--mid); margin-top: 3px; }
+  .toggle-price { font-family: 'Playfair Display', serif; font-size: 18px; font-weight: 700; color: var(--gold); }
+  .toggle-check { width: 20px; height: 20px; border: 1px solid var(--border); display: flex; align-items: center; justify-content: center; font-size: 12px; color: var(--gold); transition: all 0.3s; }
+  .custom-pack-section { display: none; border: 1px solid var(--border); padding: 20px; margin-bottom: 8px; }
+  .custom-pack-section.show { display: block; }
+  .custom-slider { width: 100%; margin: 12px 0; accent-color: #B8965A; }
+  .custom-price-display { font-family: 'Playfair Display', serif; font-size: 28px; font-weight: 900; color: var(--gold); margin-top: 8px; }
+  .custom-per { font-size: 12px; color: var(--mid); }
   .business-fields { display: none; }
   .business-fields.show { display: block; }
   .form-submit { width: 100%; padding: 18px; background: var(--gold); color: var(--black); border: none; font-family: 'DM Sans', sans-serif; font-size: 14px; font-weight: 500; letter-spacing: 0.1em; text-transform: uppercase; cursor: pointer; transition: all 0.3s; margin-top: 8px; }
@@ -154,7 +167,13 @@
         <h3 class="pack-name">10 Coffees</h3>
         <div class="pack-price">R350</div>
         <p class="pack-per">R35 per coffee — delivery included</p>
-        <ul class="pack-features"><li>Full menu — hot & cold</li><li>Order one at a time</li><li>30 min delivery</li><li>7 days, 7am–7pm</li></ul>
+        <ul class="pack-features">
+          <li>Full menu — hot & cold</li>
+          <li>Order one at a time</li>
+          <li>30 min delivery</li>
+          <li>7 days, 7am–7pm</li>
+          <li>+ Double shot option available</li>
+        </ul>
         <button class="pack-btn">Select Pack</button>
       </div>
       <div class="pack featured" onclick="scrollToOrder('individual','20 Pack','650')">
@@ -162,7 +181,13 @@
         <h3 class="pack-name">20 Coffees</h3>
         <div class="pack-price">R650</div>
         <p class="pack-per">R32.50 per coffee — save R50</p>
-        <ul class="pack-features"><li>Full menu — hot & cold</li><li>Order one at a time</li><li>30 min delivery</li><li>7 days, 7am–7pm</li></ul>
+        <ul class="pack-features">
+          <li>Full menu — hot & cold</li>
+          <li>Order one at a time</li>
+          <li>30 min delivery</li>
+          <li>7 days, 7am–7pm</li>
+          <li>+ Double shot option available</li>
+        </ul>
         <button class="pack-btn">Select Pack</button>
       </div>
       <div class="pack" onclick="scrollToOrder('business','50 Pack','1500')">
@@ -170,7 +195,12 @@
         <h3 class="pack-name">50 Coffees</h3>
         <div class="pack-price">R1,500</div>
         <p class="pack-per">R30 per coffee — bulk rate</p>
-        <ul class="pack-features"><li>Full menu — hot & cold</li><li>Bulk orders per delivery</li><li>Daily office delivery option</li><li>7 days, 7am–7pm</li></ul>
+        <ul class="pack-features">
+          <li>Full menu — hot & cold</li>
+          <li>Bulk orders per delivery</li>
+          <li>Daily office delivery option</li>
+          <li>7 days, 7am–7pm</li>
+        </ul>
         <button class="pack-btn">Select Pack</button>
       </div>
     </div>
@@ -231,24 +261,49 @@
     <div class="form-group">
       <label class="form-label">Select your pack</label>
       <div class="pack-selector">
-        <div class="pack-option selected" id="opt-10" onclick="selectPack(this,'10 Pack','350')" data-type="individual">
-          <div><div class="pack-option-name">10 Pack</div><div class="pack-option-desc">Order one at a time — on demand</div></div>
+        <div class="pack-option selected" id="opt-10" onclick="selectPack(this,'10 Pack','350',10)" data-type="individual">
+          <div><div class="pack-option-name">10 Pack</div><div class="pack-option-desc">R35 per coffee — on demand</div></div>
           <div class="pack-option-price">R350</div>
         </div>
-        <div class="pack-option" id="opt-20" onclick="selectPack(this,'20 Pack','650')" data-type="individual">
-          <div><div class="pack-option-name">20 Pack</div><div class="pack-option-desc">Best value — save R50</div></div>
+        <div class="pack-option" id="opt-20" onclick="selectPack(this,'20 Pack','650',20)" data-type="individual">
+          <div><div class="pack-option-name">20 Pack</div><div class="pack-option-desc">R32.50 per coffee — best value</div></div>
           <div class="pack-option-price">R650</div>
         </div>
-        <div class="pack-option" id="opt-50" onclick="selectPack(this,'50 Pack','1500')" data-type="business" style="display:none">
+        <div class="pack-option" id="opt-custom" onclick="selectPack(this,'Custom Pack','0',0)" data-type="individual">
+          <div><div class="pack-option-name">Custom Pack</div><div class="pack-option-desc">10–60 cups — your choice</div></div>
+          <div class="pack-option-price" id="custom-price-nav">R350</div>
+        </div>
+        <div class="pack-option" id="opt-50" onclick="selectPack(this,'50 Pack','1500',50)" data-type="business" style="display:none">
           <div><div class="pack-option-name">50 Pack</div><div class="pack-option-desc">Minimum business order</div></div>
           <div class="pack-option-price">R1,500</div>
         </div>
-        <div class="pack-option" id="opt-100" onclick="selectPack(this,'100 Pack','2800')" data-type="business" style="display:none">
+        <div class="pack-option" id="opt-100" onclick="selectPack(this,'100 Pack','2800',100)" data-type="business" style="display:none">
           <div><div class="pack-option-name">100 Pack</div><div class="pack-option-desc">High volume — R28 per coffee</div></div>
           <div class="pack-option-price">R2,800</div>
         </div>
       </div>
+
+      <!-- Custom pack slider -->
+      <div class="custom-pack-section" id="custom-pack-section">
+        <label class="form-label">How many cups? <span id="custom-cups-label">10</span></label>
+        <input type="range" class="custom-slider" id="custom-slider" min="10" max="60" value="10" oninput="updateCustomPack()">
+        <div class="custom-price-display" id="custom-price-display">R350</div>
+        <div class="custom-per" id="custom-per">R35 per coffee — standard</div>
+      </div>
+
+      <!-- Double shot toggle — individual only -->
+      <div class="double-shot-toggle hidden" id="double-shot-toggle" onclick="toggleDoubleShot()">
+        <div class="toggle-left">
+          <div class="toggle-name">Add Double Shot Upgrade</div>
+          <div class="toggle-desc">Unlock the option to add a double shot on any order — R5 extra per cup</div>
+        </div>
+        <div style="display:flex; align-items:center; gap:12px;">
+          <div class="toggle-price" id="double-shot-price">+R50</div>
+          <div class="toggle-check" id="double-shot-check">○</div>
+        </div>
+      </div>
     </div>
+
     <div class="form-row">
       <div class="form-group">
         <label class="form-label">First Name</label>
@@ -292,7 +347,7 @@
     </div>
     <div class="form-group">
       <label class="form-label">Anything else we should know?</label>
-      <textarea class="form-textarea form-input" id="notes" placeholder="Gate code, preferred time, milk preferences, allergies..."></textarea>
+      <textarea class="form-textarea form-input" id="notes" placeholder="Gate code, preferred time, allergies..."></textarea>
     </div>
     <button class="form-submit" id="submit-btn" onclick="submitOrder()">
       Confirm My Pack — <span id="price-display">R350</span>
@@ -318,7 +373,10 @@
 
   let currentType = 'individual';
   let selectedPackName = '10 Pack';
-  let selectedPackPrice = '350';
+  let selectedPackPrice = 350;
+  let selectedCups = 10;
+  let doubleShot = false;
+  let doubleShotCost = 0;
 
   function setType(type) {
     currentType = type;
@@ -332,27 +390,79 @@
     if (type === 'individual') {
       const el = document.getElementById('opt-10');
       el.classList.add('selected');
-      selectedPackName = '10 Pack'; selectedPackPrice = '350';
+      selectedPackName = '10 Pack';
+      selectedPackPrice = 350;
+      selectedCups = 10;
+      document.getElementById('double-shot-toggle').classList.remove('hidden');
     } else {
       const el = document.getElementById('opt-50');
       el.classList.add('selected');
-      selectedPackName = '50 Pack'; selectedPackPrice = '1500';
+      selectedPackName = '50 Pack';
+      selectedPackPrice = 1500;
+      selectedCups = 50;
+      document.getElementById('double-shot-toggle').classList.add('hidden');
+      doubleShot = false;
+      doubleShotCost = 0;
+      document.getElementById('double-shot-check').textContent = '○';
+      document.getElementById('double-shot-toggle').classList.remove('active');
     }
-    document.getElementById('price-display').textContent = 'R' + Number(selectedPackPrice).toLocaleString();
+    document.getElementById('custom-pack-section').classList.remove('show');
+    updatePriceDisplay();
   }
 
-  function selectPack(el, name, price) {
-    selectedPackName = name;
-    selectedPackPrice = price;
+  function selectPack(el, name, price, cups) {
     document.querySelectorAll('.pack-option').forEach(o => o.classList.remove('selected'));
     el.classList.add('selected');
-    document.getElementById('price-display').textContent = 'R' + Number(price).toLocaleString();
+    selectedPackName = name;
+    selectedCups = cups;
+
+    const isCustom = name === 'Custom Pack';
+    document.getElementById('custom-pack-section').classList.toggle('show', isCustom);
+
+    if (isCustom) {
+      document.getElementById('double-shot-toggle').classList.remove('hidden');
+      updateCustomPack();
+    } else {
+      selectedPackPrice = parseInt(price);
+      document.getElementById('double-shot-toggle').classList.remove('hidden');
+      updateDoubleShotCost();
+      updatePriceDisplay();
+    }
+  }
+
+  function updateCustomPack() {
+    const cups = parseInt(document.getElementById('custom-slider').value);
+    selectedCups = cups;
+    const basePrice = cups * 35;
+    selectedPackPrice = basePrice;
+    document.getElementById('custom-cups-label').textContent = cups;
+    document.getElementById('custom-price-display').textContent = 'R' + basePrice.toLocaleString();
+    document.getElementById('custom-per').textContent = 'R35 per coffee — standard';
+    document.getElementById('custom-price-nav').textContent = 'R' + basePrice.toLocaleString();
+    updateDoubleShotCost();
+    updatePriceDisplay();
+  }
+
+  function updateDoubleShotCost() {
+    doubleShotCost = doubleShot ? selectedCups * 5 : 0;
+    document.getElementById('double-shot-price').textContent = '+R' + (selectedCups * 5).toLocaleString();
+  }
+
+  function toggleDoubleShot() {
+    doubleShot = !doubleShot;
+    document.getElementById('double-shot-check').textContent = doubleShot ? '✓' : '○';
+    document.getElementById('double-shot-toggle').classList.toggle('active', doubleShot);
+    doubleShotCost = doubleShot ? selectedCups * 5 : 0;
+    updatePriceDisplay();
+  }
+
+  function updatePriceDisplay() {
+    const total = selectedPackPrice + doubleShotCost;
+    document.getElementById('price-display').textContent = 'R' + total.toLocaleString();
   }
 
   function scrollToOrder(type, pack, price) {
     setType(type);
-    selectedPackName = pack; selectedPackPrice = price;
-    document.getElementById('price-display').textContent = 'R' + Number(price).toLocaleString();
     setTimeout(() => document.getElementById('order').scrollIntoView({ behavior: 'smooth' }), 100);
   }
 
@@ -383,18 +493,25 @@
       notesStr = `Company: ${company} | Per delivery: ${perDelivery} | Schedule: ${schedule}${notes ? ' | ' + notes : ''}`;
     }
 
+    const totalAmount = selectedPackPrice + doubleShotCost;
+    const packLabel = selectedPackName === 'Custom Pack'
+      ? `Custom ${selectedCups} Pack${doubleShot ? ' + Double Shot' : ''}`
+      : `${selectedPackName}${doubleShot ? ' + Double Shot' : ''}`;
+
     try {
       const response = await fetch('/.netlify/functions/create-payment', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          amount: parseInt(selectedPackPrice) * 100,
+          amount: totalAmount * 100,
           currency: 'ZAR',
           name: `${fname} ${lname}`.trim(),
           phone,
           address,
-          pack_type: selectedPackName,
+          pack_type: packLabel,
           customer_type: currentType,
+          double_shot: doubleShot,
+          cups: selectedCups,
           notes: notesStr || null
         })
       });
@@ -407,7 +524,7 @@
       }
     } catch (err) {
       btn.disabled = false;
-      btn.textContent = `Confirm My Pack — R${Number(selectedPackPrice).toLocaleString()}`;
+      btn.textContent = `Confirm My Pack — R${(selectedPackPrice + doubleShotCost).toLocaleString()}`;
       errorEl.style.display = 'block';
       errorEl.textContent = 'Something went wrong. Please try again.';
     }
