@@ -1,0 +1,317 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Dashboard — Brewed Awakening</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700;900&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  :root { --black: #0A0A08; --cream: #F2EDE4; --gold: #B8965A; --gold-light: #D4B07A; --mid: #7A7060; --border: rgba(184,150,90,0.25); --green: #4A9E6B; --red: #9E4A4A; }
+  body { background: var(--black); color: var(--cream); font-family: 'DM Sans', sans-serif; font-weight: 300; min-height: 100vh; }
+  /* LOGIN */
+  .login-wrap { min-height: 100vh; display: flex; align-items: center; justify-content: center; padding: 40px 20px; }
+  .login-card { max-width: 400px; width: 100%; border: 1px solid var(--border); padding: 48px 40px; text-align: center; }
+  .login-card h1 { font-family: 'Playfair Display', serif; font-size: 28px; color: var(--gold); margin-bottom: 8px; }
+  .login-card p { font-size: 13px; color: var(--mid); margin-bottom: 32px; }
+  .form-input { width: 100%; background: rgba(255,255,255,0.03); border: 1px solid var(--border); color: var(--cream); padding: 14px 16px; font-family: 'DM Sans', sans-serif; font-size: 14px; outline: none; transition: border-color 0.3s; margin-bottom: 16px; }
+  .form-input:focus { border-color: var(--gold); }
+  .btn { width: 100%; padding: 14px; background: var(--gold); color: var(--black); border: none; font-family: 'DM Sans', sans-serif; font-size: 13px; font-weight: 500; letter-spacing: 0.08em; text-transform: uppercase; cursor: pointer; transition: all 0.3s; }
+  .btn:hover { background: var(--gold-light); }
+  .error { color: #e08080; font-size: 13px; margin-top: 12px; }
+  /* DASHBOARD */
+  .dash-wrap { display: none; }
+  nav { background: var(--black); border-bottom: 1px solid var(--border); padding: 16px 32px; display: flex; justify-content: space-between; align-items: center; position: sticky; top: 0; z-index: 100; }
+  .nav-title { font-family: 'Playfair Display', serif; font-size: 18px; color: var(--gold); }
+  .nav-right { display: flex; gap: 16px; align-items: center; }
+  .nav-time { font-size: 12px; color: var(--mid); }
+  .btn-sm { padding: 8px 16px; font-size: 11px; letter-spacing: 0.08em; text-transform: uppercase; cursor: pointer; transition: all 0.3s; border: 1px solid var(--border); background: transparent; color: var(--mid); font-family: 'DM Sans', sans-serif; }
+  .btn-sm:hover { border-color: var(--gold); color: var(--gold); }
+  .main { padding: 32px; max-width: 1200px; margin: 0 auto; }
+  /* STATS */
+  .stats { display: grid; grid-template-columns: repeat(4, 1fr); gap: 2px; margin-bottom: 32px; }
+  .stat { border: 1px solid var(--border); padding: 24px; }
+  .stat-label { font-size: 10px; letter-spacing: 0.2em; text-transform: uppercase; color: var(--mid); margin-bottom: 8px; }
+  .stat-num { font-family: 'Playfair Display', serif; font-size: 36px; font-weight: 900; color: var(--gold); }
+  .stat-sub { font-size: 11px; color: var(--mid); margin-top: 4px; }
+  /* TABS */
+  .tabs { display: flex; gap: 2px; margin-bottom: 24px; }
+  .tab { padding: 10px 24px; border: 1px solid var(--border); background: transparent; color: var(--mid); font-family: 'DM Sans', sans-serif; font-size: 12px; font-weight: 500; letter-spacing: 0.08em; text-transform: uppercase; cursor: pointer; transition: all 0.3s; }
+  .tab.active { border-color: var(--gold); color: var(--gold); background: rgba(184,150,90,0.08); }
+  /* ORDERS TABLE */
+  .section-title { font-family: 'Playfair Display', serif; font-size: 20px; margin-bottom: 16px; }
+  .orders-list { display: flex; flex-direction: column; gap: 2px; }
+  .order-card { border: 1px solid var(--border); padding: 20px 24px; display: grid; grid-template-columns: 1fr 2fr 1fr 1fr auto; gap: 16px; align-items: center; transition: border-color 0.3s; }
+  .order-card:hover { border-color: rgba(184,150,90,0.4); }
+  .order-card.delivered { opacity: 0.5; }
+  .order-time { font-size: 11px; color: var(--mid); }
+  .order-drink { font-size: 15px; font-weight: 500; }
+  .order-milk { font-size: 11px; color: var(--mid); margin-top: 2px; }
+  .order-customer { font-size: 13px; }
+  .order-phone { font-size: 11px; color: var(--mid); margin-top: 2px; }
+  .order-address { font-size: 12px; color: var(--mid); }
+  .status-badge { display: inline-block; padding: 4px 10px; font-size: 10px; letter-spacing: 0.1em; text-transform: uppercase; border-radius: 20px; }
+  .status-pending { background: rgba(184,150,90,0.15); color: var(--gold); border: 1px solid var(--border); }
+  .status-delivered { background: rgba(74,158,107,0.15); color: var(--green); border: 1px solid rgba(74,158,107,0.3); }
+  .deliver-btn { padding: 8px 16px; background: var(--gold); color: var(--black); border: none; font-family: 'DM Sans', sans-serif; font-size: 11px; font-weight: 500; letter-spacing: 0.08em; text-transform: uppercase; cursor: pointer; transition: all 0.3s; white-space: nowrap; }
+  .deliver-btn:hover { background: var(--gold-light); }
+  .deliver-btn.done { background: transparent; border: 1px solid var(--border); color: var(--mid); cursor: default; }
+  /* CUSTOMERS TABLE */
+  .customers-list { display: flex; flex-direction: column; gap: 2px; }
+  .customer-card { border: 1px solid var(--border); padding: 20px 24px; display: grid; grid-template-columns: 2fr 1fr 1fr 1fr 1fr; gap: 16px; align-items: center; }
+  .customer-name { font-size: 14px; font-weight: 500; }
+  .customer-phone { font-size: 11px; color: var(--mid); margin-top: 2px; }
+  .customer-address { font-size: 12px; color: var(--mid); }
+  .cups-num { font-family: 'Playfair Display', serif; font-size: 24px; font-weight: 900; color: var(--gold); }
+  .cups-label { font-size: 10px; color: var(--mid); text-transform: uppercase; letter-spacing: 0.1em; }
+  .bonus-num { font-size: 13px; color: var(--gold); }
+  .empty-state { border: 1px solid var(--border); padding: 60px; text-align: center; color: var(--mid); font-size: 14px; }
+  .refresh-btn { padding: 8px 16px; border: 1px solid var(--border); background: transparent; color: var(--mid); font-family: 'DM Sans', sans-serif; font-size: 11px; cursor: pointer; transition: all 0.3s; margin-left: auto; display: block; margin-bottom: 16px; }
+  .refresh-btn:hover { border-color: var(--gold); color: var(--gold); }
+  .hidden { display: none; }
+  @media (max-width: 900px) { .stats { grid-template-columns: 1fr 1fr; } .order-card { grid-template-columns: 1fr; } .customer-card { grid-template-columns: 1fr 1fr; } }
+</style>
+</head>
+<body>
+
+<!-- LOGIN -->
+<div class="login-wrap" id="login-wrap">
+  <div class="login-card">
+    <h1>Dashboard</h1>
+    <p>Brewed Awakening — Operations</p>
+    <input class="form-input" type="password" id="pwd" placeholder="Enter password" onkeydown="if(event.key==='Enter') login()">
+    <button class="btn" onclick="login()">Login</button>
+    <div class="error hidden" id="login-error">Incorrect password</div>
+  </div>
+</div>
+<!-- DASHBOARD -->
+<div class="dash-wrap" id="dash-wrap">
+  <nav>
+    <div class="nav-title">Brewed Awakening — Dashboard</div>
+    <div class="nav-right">
+      <span class="nav-time" id="clock"></span>
+      <button class="btn-sm" onclick="loadAll()">Refresh</button>
+      <button class="btn-sm" onclick="logoutDash()">Logout</button>
+    </div>
+  </nav>
+
+  <div class="main">
+    <!-- Stats -->
+    <div class="stats">
+      <div class="stat">
+        <div class="stat-label">Pending Orders</div>
+        <div class="stat-num" id="stat-pending">0</div>
+        <div class="stat-sub">Needs delivery</div>
+      </div>
+      <div class="stat">
+        <div class="stat-label">Delivered Today</div>
+        <div class="stat-num" id="stat-delivered">0</div>
+        <div class="stat-sub">Completed</div>
+      </div>
+      <div class="stat">
+        <div class="stat-label">Active Subscribers</div>
+        <div class="stat-num" id="stat-customers">0</div>
+        <div class="stat-sub">With cups remaining</div>
+      </div>
+      <div class="stat">
+        <div class="stat-label">Total Cups Live</div>
+        <div class="stat-num" id="stat-cups">0</div>
+        <div class="stat-sub">Across all accounts</div>
+      </div>
+    </div>
+
+    <!-- Tabs -->
+    <div class="tabs">
+      <button class="tab active" onclick="switchTab('orders', this)">Drink Orders</button>
+      <button class="tab" onclick="switchTab('customers', this)">Subscribers</button>
+    </div>
+
+    <!-- ORDERS TAB -->
+    <div id="tab-orders">
+      <button class="refresh-btn" onclick="loadOrders()">↻ Refresh orders</button>
+      <div class="orders-list" id="orders-list">
+        <div class="empty-state">Loading orders...</div>
+      </div>
+    </div>
+
+    <!-- CUSTOMERS TAB -->
+    <div id="tab-customers" class="hidden">
+      <button class="refresh-btn" onclick="loadCustomers()">↻ Refresh subscribers</button>
+      <div class="customers-list" id="customers-list">
+        <div class="empty-state">Loading subscribers...</div>
+      </div>
+    </div>
+  </div>
+</div>
+<script>
+  const { createClient } = supabase;
+  const db = createClient(
+    'https://tjbcszfaveyzlcvwuxtw.supabase.co',
+    'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InRqYmNzemZhdmV5emxjdnd1eHR3Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzg1Njc4MDAsImV4cCI6MjA5NDE0MzgwMH0.GloLk5-9h-wh8XdmQkLIxyAcTGOIB0YnptN-t_eZ_4Y'
+  );
+
+  const PASSWORD = '2344';
+
+  function login() {
+    const pwd = document.getElementById('pwd').value;
+    if (pwd === PASSWORD) {
+      document.getElementById('login-wrap').style.display = 'none';
+      document.getElementById('dash-wrap').style.display = 'block';
+      loadAll();
+      startClock();
+    } else {
+      document.getElementById('login-error').classList.remove('hidden');
+    }
+  }
+
+  function logoutDash() {
+    document.getElementById('login-wrap').style.display = 'flex';
+    document.getElementById('dash-wrap').style.display = 'none';
+    document.getElementById('pwd').value = '';
+  }
+
+  function startClock() {
+    function tick() {
+      const now = new Date();
+      document.getElementById('clock').textContent = now.toLocaleTimeString('en-ZA', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+    }
+    tick();
+    setInterval(tick, 1000);
+  }
+
+  function switchTab(tab, btn) {
+    document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+    btn.classList.add('active');
+    document.getElementById('tab-orders').classList.toggle('hidden', tab !== 'orders');
+    document.getElementById('tab-customers').classList.toggle('hidden', tab !== 'customers');
+    if (tab === 'orders') loadOrders();
+    if (tab === 'customers') loadCustomers();
+  }
+
+  async function loadAll() {
+    await loadOrders();
+    await loadCustomers();
+    await loadStats();
+  }
+
+  async function loadStats() {
+    try {
+      const { data: pending } = await db.from('drink_orders').select('id').eq('status', 'pending');
+      const { data: delivered } = await db.from('drink_orders').select('id').eq('status', 'delivered');
+      const { data: customers } = await db.from('customers').select('cups_remaining, bonus_cups').gt('cups_remaining', 0);
+
+      document.getElementById('stat-pending').textContent = pending?.length || 0;
+      document.getElementById('stat-delivered').textContent = delivered?.length || 0;
+      document.getElementById('stat-customers').textContent = customers?.length || 0;
+
+      const totalCups = customers?.reduce((sum, c) => sum + c.cups_remaining + c.bonus_cups, 0) || 0;
+      document.getElementById('stat-cups').textContent = totalCups;
+    } catch (err) { console.error(err); }
+  }
+
+  async function loadOrders() {
+    const list = document.getElementById('orders-list');
+    list.innerHTML = '<div class="empty-state">Loading...</div>';
+    try {
+      const { data, error } = await db.from('drink_orders').select('*').order('created_at', { ascending: false }).limit(50);
+      if (error) throw error;
+      if (!data || data.length === 0) {
+        list.innerHTML = '<div class="empty-state">No orders yet. They will appear here in real time.</div>';
+        return;
+      }
+      list.innerHTML = data.map(order => {
+        const time = new Date(order.created_at).toLocaleTimeString('en-ZA', { hour: '2-digit', minute: '2-digit' });
+        const date = new Date(order.created_at).toLocaleDateString('en-ZA', { day: 'numeric', month: 'short' });
+        const isDelivered = order.status === 'delivered';
+        return `
+          <div class="order-card ${isDelivered ? 'delivered' : ''}" id="order-${order.id}">
+            <div>
+              <div class="order-time">${date} ${time}</div>
+              <span class="status-badge ${isDelivered ? 'status-delivered' : 'status-pending'}">${isDelivered ? 'Delivered' : 'Pending'}</span>
+            </div>
+            <div>
+              <div class="order-drink">${order.drink}</div>
+              <div class="order-milk">${order.milk_preference || 'Whole milk'}${order.notes ? ' · ' + order.notes : ''}</div>
+            </div>
+            <div>
+              <div class="order-customer">${order.customer_name || '—'}</div>
+              <div class="order-phone">${order.customer_phone || '—'}</div>
+            </div>
+            <div class="order-address">${order.address || 'No address'}</div>
+            <button class="deliver-btn ${isDelivered ? 'done' : ''}" onclick="markDelivered(${order.id}, this)" ${isDelivered ? 'disabled' : ''}>
+              ${isDelivered ? 'Done ✓' : 'Mark Delivered'}
+            </button>
+          </div>`;
+      }).join('');
+    } catch (err) {
+      list.innerHTML = '<div class="empty-state">Error loading orders.</div>';
+      console.error(err);
+    }
+  }
+
+  async function markDelivered(id, btn) {
+    btn.disabled = true;
+    btn.textContent = 'Updating...';
+    try {
+      const { error } = await db.from('drink_orders').update({ status: 'delivered' }).eq('id', id);
+      if (error) throw error;
+      btn.textContent = 'Done ✓';
+      btn.classList.add('done');
+      const card = document.getElementById('order-' + id);
+      card.classList.add('delivered');
+      card.querySelector('.status-badge').className = 'status-badge status-delivered';
+      card.querySelector('.status-badge').textContent = 'Delivered';
+      loadStats();
+    } catch (err) {
+      btn.disabled = false;
+      btn.textContent = 'Mark Delivered';
+      console.error(err);
+    }
+  }
+
+  async function loadCustomers() {
+    const list = document.getElementById('customers-list');
+    list.innerHTML = '<div class="empty-state">Loading...</div>';
+    try {
+      const { data, error } = await db.from('customers').select('*').order('created_at', { ascending: false });
+      if (error) throw error;
+      if (!data || data.length === 0) {
+        list.innerHTML = '<div class="empty-state">No subscribers yet.</div>';
+        return;
+      }
+      list.innerHTML = data.map(c => `
+        <div class="customer-card">
+          <div>
+            <div class="customer-name">${c.name || '—'}</div>
+            <div class="customer-phone">${c.phone}</div>
+          </div>
+          <div class="customer-address">${c.address || 'No address'}</div>
+          <div>
+            <div class="cups-num">${c.cups_remaining}</div>
+            <div class="cups-label">cups left</div>
+          </div>
+          <div>
+            <div class="bonus-num">+${c.bonus_cups || 0} bonus</div>
+            <div class="cups-label">loyalty cups</div>
+          </div>
+          <div>
+            <div style="font-size:12px; color:var(--mid);">${c.pack_type || '—'}</div>
+            <div style="font-size:11px; color:var(--mid); margin-top:4px;">${c.reorder_count || 0} reorders</div>
+          </div>
+        </div>`).join('');
+    } catch (err) {
+      list.innerHTML = '<div class="empty-state">Error loading subscribers.</div>';
+      console.error(err);
+    }
+  }
+
+  // Auto refresh every 30 seconds
+  setInterval(() => {
+    if (document.getElementById('dash-wrap').style.display === 'block') {
+      loadAll();
+    }
+  }, 30000);
+</script>
+</body>
+</html>
